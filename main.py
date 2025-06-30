@@ -91,9 +91,11 @@ class CajaWizardScreen(MDScreen):
         self.manager.current = "comprobante"
 
     def dialog(self, mensaje):
-        MDDialog(title="Atención", text=mensaje, buttons=[
-            MDFlatButton(text="OK", on_release=lambda x: self.dialog_inst.dismiss())
-        ])
+        self.dialog_inst = MDDialog(
+            title="Atención",
+            text=mensaje,
+            buttons=[MDFlatButton(text="OK", on_release=lambda x: self.dialog_inst.dismiss())]
+        )
         self.dialog_inst.open()
 
 class ComprobanteScreen(MDScreen):
