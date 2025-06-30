@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "nombre": "Servicios Domiciliarios Express",
+    "nit": "900123456-1",
+    "direccion": "Calle 15 #23-45, Bogotá",
+    "telefono": "6011234567",
+    "email": "contacto@domicilioexpress.com",
+    "servicios": ["Domicilios", "Mensajería", "Carga"],
+    "horario": "6:00 AM - 10:00 PM",
+    "zona_cobertura": "Bogotá Centro",
+    "tarifa_base": 8000,
+    "estado": "Activo",
+    "contacto_principal": "Carlos Mendoza"
+  },
+  {
+    "id": 2,
+    "nombre": "Domicilios Rápidos Medellín",
+    "nit": "900234567-2",
+    "direccion": "Carrera 64 #78-90, Medellín",
+    "telefono": "6042345678",
+    "email": "info@domiciliosrapidos.com",
+    "servicios": ["Domicilios", "Mensajería", "Carga Express"],
+    "horario": "5:00 AM - 11:00 PM",
+    "zona_cobertura": "Medellín y Área Metropolitana",
+    "tarifa_base": 7000,
+    "estado": "Activo",
+    "contacto_principal": "Ana Gutiérrez"
+  },
+  {
+    "id": 3,
+    "nombre": "Express Delivery Cali",
+    "nit": "900345678-3",
+    "direccion": "Avenida 4 Norte #5-67, Cali",
+    "telefono": "6023456789",
+    "email": "servicio@expressdelivery.com",
+    "servicios": ["Domicilios", "Mensajería", "Carga", "Almacenamiento"],
+    "horario": "6:00 AM - 9:00 PM",
+    "zona_cobertura": "Cali y Municipios Vecinos",
+    "tarifa_base": 6000,
+    "estado": "Activo",
+    "contacto_principal": "Roberto Silva"
+  },
+  {
+    "id": 4,
+    "nombre": "Domicilios Barranquilla Plus",
+    "nit": "900456789-4",
+    "direccion": "Calle 45 #67-89, Barranquilla",
+    "telefono": "6054567890",
+    "email": "atencion@domiciliosplus.com",
+    "servicios": ["Domicilios", "Mensajería", "Carga", "Logística"],
+    "horario": "7:00 AM - 10:00 PM",
+    "zona_cobertura": "Barranquilla y Soledad",
+    "tarifa_base": 5500,
+    "estado": "Activo",
+    "contacto_principal": "María Herrera"
+  },
+  {
+    "id": 5,
+    "nombre": "Bucaramanga Express",
+    "nit": "900567890-5",
+    "direccion": "Carrera 27 #45-67, Bucaramanga",
+    "telefono": "6075678901",
+    "email": "contacto@bucaramangaexpress.com",
+    "servicios": ["Domicilios", "Mensajería", "Carga", "Distribución"],
+    "horario": "6:00 AM - 9:00 PM",
+    "zona_cobertura": "Bucaramanga y Área Metropolitana",
+    "tarifa_base": 6500,
+    "estado": "Activo",
+    "contacto_principal": "Jorge Ramírez"
+  }
+] 

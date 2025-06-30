@@ -1,0 +1,883 @@
+#:kivy 2.1.0
+
+<MainScreen>:
+    MDBoxLayout:
+        orientation: 'horizontal'
+        md_bg_color: app.theme_cls.primary_light
+        
+        # Barra superior
+        MDTopAppBar:
+            title: "📄 Gestor de Recibos"
+            title_font_size: "20sp"
+            elevation: 8
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: 1, 1, 1, 1
+            right_action_items: [["camera", lambda x: root.open_camera()], ["draw", lambda x: root.open_signature()], ["content-save", lambda x: root.save_receipt()]]
+        
+        # Contenido principal - Layout de dos columnas
+        MDBoxLayout:
+            orientation: 'horizontal'
+            spacing: '0dp'
+            
+            # COLUMNA IZQUIERDA - Formulario
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.6
+                padding: '20dp'
+                spacing: '16dp'
+                
+                # Indicador de progreso
+                MDCard:
+                    size_hint_y: None
+                    height: "80dp"
+                    padding: "16dp"
+                    elevation: 4
+                    md_bg_color: app.theme_cls.primary_light
+                    radius: [20, 20, 20, 20]
+                    
+                    MDBoxLayout:
+                        orientation: 'horizontal'
+                        spacing: '8dp'
+                        
+                        MDIcon:
+                            icon: "1-circle" if root.current_step == 1 else "1-circle-outline"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_cls.primary_color if root.current_step == 1 else (.5, .5, .5, 1)
+                            size_hint_x: None
+                            width: "32dp"
+                        MDSeparator:
+                            orientation: 'vertical'
+                            height: "32dp"
+                            color: app.theme_cls.primary_color
+                        MDIcon:
+                            icon: "2-circle" if root.current_step == 2 else "2-circle-outline"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_cls.primary_color if root.current_step == 2 else (.5, .5, .5, 1)
+                            size_hint_x: None
+                            width: "32dp"
+                        MDSeparator:
+                            orientation: 'vertical'
+                            height: "32dp"
+                            color: app.theme_cls.primary_color
+                        MDIcon:
+                            icon: "3-circle" if root.current_step == 3 else "3-circle-outline"
+                            theme_text_color: "Custom"
+                            text_color: app.theme_cls.primary_color if root.current_step == 3 else (.5, .5, .5, 1)
+                            size_hint_x: None
+                            width: "32dp"
+                        
+                # PASO 1: Información Básica
+                MDCard:
+                    id: step1_card
+                    size_hint_y: None
+                    height: "200dp"
+                    padding: "20dp"
+                    elevation: 6
+                    md_bg_color: 1, 1, 1, 1
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        spacing: '16dp'
+                        
+                        MDLabel:
+                            text: "🏁 Paso 1: Información Básica"
+                            halign: "center"
+                            font_style: "H6"
+                            theme_text_color: "Primary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        
+                        # Fecha (automática)
+                        MDTextField:
+                            id: fecha_field
+                            hint_text: "📅 Fecha"
+                            text: "2024-01-15"
+                            helper_text: "Fecha automática del sistema"
+                            helper_text_mode: "on_focus"
+                            readonly: True
+                            icon_right: "calendar"
+                            icon_right_color: app.theme_cls.primary_color
+                        
+                        # Monto
+                        MDTextField:
+                            id: monto_field
+                            hint_text: "💰 Monto"
+                            input_filter: "float"
+                            helper_text: "Ingrese el monto en números"
+                            helper_text_mode: "on_focus"
+                            icon_right: "currency-usd"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                
+                # PASO 2: Clasificación
+                MDCard:
+                    id: step2_card
+                    size_hint_y: None
+                    height: "280dp"
+                    padding: "20dp"
+                    elevation: 6
+                    md_bg_color: 1, 1, 1, 1
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        spacing: '16dp'
+                        
+                        MDLabel:
+                            text: "🏷️ Paso 2: Clasificación"
+                            halign: "center"
+                            font_style: "H6"
+                            theme_text_color: "Primary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        
+                        # Tipo de uso
+                        MDLabel:
+                            text: "Tipo de Uso:"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            theme_text_color: "Secondary"
+                        
+                        Spinner:
+                            id: uso_spinner
+                            text: "Seleccionar uso"
+                            values: ["Pago", "Gasto", "Devolución"]
+                            size_hint_y: None
+                            height: "48dp"
+                            background_color: app.theme_cls.primary_color
+                            color: 1, 1, 1, 1
+                            on_text: root.on_uso_selected(self, self.text)
+                        
+                        # Concepto (dinámico según uso)
+                        MDLabel:
+                            text: "Concepto:"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            theme_text_color: "Secondary"
+                        
+                        Spinner:
+                            id: concepto_spinner
+                            text: "Seleccionar concepto"
+                            values: []
+                            size_hint_y: None
+                            height: "48dp"
+                            background_color: app.theme_cls.primary_color
+                            color: 1, 1, 1, 1
+                            on_text: root.on_concepto_selected(self, self.text)
+                        
+                        # Método de pago
+                        MDLabel:
+                            text: "Método de Pago:"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            theme_text_color: "Secondary"
+                        
+                        Spinner:
+                            id: metodo_spinner
+                            text: "Seleccionar método"
+                            values: ["Efectivo", "Transferencia", "Consignación", "Nequi", "Daviplata", "Tarjeta"]
+                            size_hint_y: None
+                            height: "48dp"
+                            background_color: app.theme_cls.primary_color
+                            color: 1, 1, 1, 1
+                            on_text: root.on_metodo_selected(self, self.text)
+                
+                # PASO 3: Detalles Específicos
+                MDCard:
+                    id: step3_card
+                    size_hint_y: None
+                    height: "400dp"
+                    padding: "20dp"
+                    elevation: 6
+                    md_bg_color: 1, 1, 1, 1
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        spacing: '16dp'
+                        
+                        MDLabel:
+                            text: "📝 Paso 3: Detalles Específicos"
+                            halign: "center"
+                            font_style: "H6"
+                            theme_text_color: "Primary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        
+                        # Campos específicos - se ocultan/muestran dinámicamente
+                        MDTextField:
+                            id: empleado_field
+                            hint_text: "👤 Empleado (para nómina)"
+                            disabled: True
+                            helper_text: "Solo para nómina"
+                            helper_text_mode: "on_focus"
+                            icon_right: "account"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        MDTextField:
+                            id: factura_field
+                            hint_text: "📄 Número de Factura"
+                            disabled: True
+                            helper_text: "Para abonos y domicilios"
+                            helper_text_mode: "on_focus"
+                            icon_right: "file-document"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        MDTextField:
+                            id: empresa_domicilio_field
+                            hint_text: "🏢 Empresa Domiciliaria"
+                            disabled: True
+                            helper_text: "Solo para domicilios"
+                            helper_text_mode: "on_focus"
+                            icon_right: "office-building"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        MDTextField:
+                            id: costo_domicilio_field
+                            hint_text: "💵 Costo del Domicilio"
+                            disabled: True
+                            helper_text: "Solo para domicilios"
+                            helper_text_mode: "on_focus"
+                            input_filter: "float"
+                            icon_right: "currency-usd"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        MDTextField:
+                            id: num_transaccion_field
+                            hint_text: "🔢 Número de Transacción"
+                            disabled: True
+                            helper_text: "Para transferencias y consignaciones"
+                            helper_text_mode: "on_focus"
+                            icon_right: "bank"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        MDTextField:
+                            id: banco_field
+                            hint_text: "🏦 Banco"
+                            disabled: True
+                            helper_text: "Para transferencias y consignaciones"
+                            helper_text_mode: "on_focus"
+                            icon_right: "bank"
+                            icon_right_color: app.theme_cls.primary_color
+                            on_text: root.update_preview()
+                            opacity: 0
+                            size_hint_y: None
+                            height: 0
+                        
+                        # Mensaje cuando no hay campos específicos
+                        MDLabel:
+                            id: no_specific_fields_label
+                            text: "No se requieren campos adicionales para este concepto"
+                            halign: "center"
+                            theme_text_color: "Secondary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            opacity: 1
+                
+                # Botones de navegación
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: '60dp'
+                    spacing: '16dp'
+                    
+                    MDRaisedButton:
+                        text: "⬅️ Anterior"
+                        on_release: root.previous_step()
+                        size_hint_x: 0.5
+                        md_bg_color: app.theme_cls.primary_light
+                        text_color: 0, 0, 0, 1
+                    
+                    MDRaisedButton:
+                        text: "Siguiente ➡️"
+                        on_release: root.next_step()
+                        size_hint_x: 0.5
+                        md_bg_color: app.theme_cls.accent_color
+                        text_color: 1, 1, 1, 1
+            
+            # COLUMNA DERECHA - Previsualización en tiempo real
+            MDBoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.4
+                padding: '20dp'
+                spacing: '16dp'
+                
+                # Título de previsualización
+                MDCard:
+                    size_hint_y: None
+                    height: "80dp"
+                    padding: "16dp"
+                    elevation: 4
+                    md_bg_color: app.theme_cls.accent_color
+                    
+                    MDLabel:
+                        text: "👁️ Previsualización en Tiempo Real"
+                        halign: "center"
+                        font_style: "H5"
+                        theme_text_color: "Custom"
+                        text_color: 1, 1, 1, 1
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                
+                # Previsualización mejorada
+                MDCard:
+                    size_hint_y: None
+                    height: "420dp"
+                    padding: "24dp"
+                    elevation: 8
+                    md_bg_color: 1, 1, 1, 1
+                    radius: [20, 20, 20, 20]
+                    shadow_radius: 16
+                    shadow_offset: [0, 4]
+                    
+                    MDLabel:
+                        text: "[b]Previsualización del Recibo[/b]"
+                        markup: True
+                        halign: "center"
+                        font_style: "H6"
+                        theme_text_color: "Primary"
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                    MDSeparator:
+                        height: "2dp"
+                        color: app.theme_cls.primary_color
+                    ScrollView:
+                        MDLabel:
+                            id: preview_label
+                            text: "Complete los campos para ver la previsualización"
+                            halign: "left"
+                            valign: "top"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                            theme_text_color: "Secondary"
+                            padding: "8dp"
+                            markup: True
+                
+                # Sección de evidencias
+                MDCard:
+                    size_hint_y: None
+                    height: "300dp"
+                    padding: "20dp"
+                    elevation: 6
+                    md_bg_color: 1, 1, 1, 1
+                    
+                    MDBoxLayout:
+                        orientation: 'vertical'
+                        spacing: '16dp'
+                        
+                        MDLabel:
+                            text: "📸 Evidencias"
+                            halign: "center"
+                            font_style: "H6"
+                            theme_text_color: "Primary"
+                            size_hint_y: None
+                            height: self.texture_size[1]
+                        
+                        # Imágenes capturadas
+                        MDBoxLayout:
+                            orientation: 'horizontal'
+                            spacing: '16dp'
+                            size_hint_y: None
+                            height: "120dp"
+                            
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                spacing: '8dp'
+                                size_hint_x: 0.5
+                                
+                                MDLabel:
+                                    text: "📷 Imagen:"
+                                    size_hint_y: None
+                                    height: self.texture_size[1]
+                                    theme_text_color: "Secondary"
+                                
+                                Image:
+                                    id: image_preview
+                                    size_hint_y: None
+                                    height: "80dp"
+                                    fit_mode: "contain"
+                            
+                            MDBoxLayout:
+                                orientation: 'vertical'
+                                spacing: '8dp'
+                                size_hint_x: 0.5
+                                
+                                MDLabel:
+                                    text: "✍️ Firma:"
+                                    size_hint_y: None
+                                    height: self.texture_size[1]
+                                    theme_text_color: "Secondary"
+                                
+                                Image:
+                                    id: signature_preview
+                                    size_hint_y: None
+                                    height: "80dp"
+                                    fit_mode: "contain"
+                
+                # Botones de acción mejorados
+                MDBoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: '70dp'
+                    spacing: '24dp'
+                    padding: '8dp'
+                    
+                    MDRaisedButton:
+                        text: "📄 Generar PDF"
+                        on_release: root.generate_pdf()
+                        size_hint_x: 0.5
+                        md_bg_color: app.theme_cls.accent_color
+                        text_color: 1, 1, 1, 1
+                        font_size: "18sp"
+                        elevation: 4
+                    MDRaisedButton:
+                        text: "🗑️ Limpiar"
+                        on_release: root.clear_form()
+                        size_hint_x: 0.5
+                        md_bg_color: app.theme_cls.error_color
+                        text_color: 1, 1, 1, 1
+                        font_size: "18sp"
+                        elevation: 4
+
+<SignatureScreen>:
+    MDBoxLayout:
+        orientation: 'vertical'
+        md_bg_color: app.theme_cls.primary_light
+        
+        # Barra superior mejorada
+        MDTopAppBar:
+            title: "✍️ Capturar Firma"
+            title_font_size: "18sp"
+            left_action_items: [["arrow-left", lambda x: setattr(root.manager, 'current', 'main')]]
+            elevation: 8
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: 1, 1, 1, 1
+        
+        # Contenido principal
+        MDBoxLayout:
+            orientation: 'vertical'
+            padding: '24dp'
+            spacing: '20dp'
+            
+            # Título de la sección
+            MDCard:
+                size_hint_y: None
+                height: "80dp"
+                padding: "16dp"
+                elevation: 4
+                md_bg_color: app.theme_cls.primary_color
+                
+                MDLabel:
+                    text: "✍️ Dibuja tu Firma"
+                    halign: "center"
+                    font_style: "H5"
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    size_hint_y: None
+                    height: self.texture_size[1]
+            
+            # Área de firma mejorada
+            MDCard:
+                size_hint_y: None
+                height: "400dp"
+                padding: "20dp"
+                elevation: 6
+                md_bg_color: 1, 1, 1, 1
+                
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    spacing: '16dp'
+                    
+                    MDLabel:
+                        text: "📝 Área de Firma"
+                        halign: "center"
+                        font_style: "H6"
+                        theme_text_color: "Primary"
+                        size_hint_y: None
+                        height: self.texture_size[1]
+                    
+                    # Widget de firma
+                    Widget:
+                        id: signature_container
+                        size_hint_y: None
+                        height: "280dp"
+                        canvas.before:
+                            Color:
+                                rgba: 1, 1, 1, 1
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+                        canvas.after:
+                            Color:
+                                rgba: app.theme_cls.primary_color
+                            Line:
+                                rectangle: self.x, self.y, self.width, self.height
+                                width: 3
+        
+        # Botones inferiores mejorados
+        MDBoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: '80dp'
+            spacing: '16dp'
+            padding: '16dp'
+            md_bg_color: app.theme_cls.primary_color
+            
+            MDRaisedButton:
+                text: "🗑️ Limpiar"
+                on_release: root.clear_signature()
+                size_hint_x: 0.33
+                md_bg_color: app.theme_cls.error_color
+                text_color: 1, 1, 1, 1
+            
+            MDRaisedButton:
+                text: "💾 Guardar"
+                on_release: root.save_signature()
+                size_hint_x: 0.33
+                md_bg_color: app.theme_cls.accent_color
+                text_color: 1, 1, 1, 1
+            
+            MDRaisedButton:
+                text: "❌ Cancelar"
+                on_release: setattr(root.manager, 'current', 'main')
+                size_hint_x: 0.33
+                md_bg_color: app.theme_cls.primary_light
+                text_color: 0, 0, 0, 1
+
+<CajaWizardScreen>:
+    current_step: 1
+    MDBoxLayout:
+        orientation: 'vertical'
+        md_bg_color: app.theme_cls.primary_light
+        padding: '16dp'
+        spacing: '16dp'
+
+        # Barra superior
+        MDTopAppBar:
+            title: "Cierre de Caja"
+            elevation: 8
+            md_bg_color: app.theme_cls.primary_color
+            specific_text_color: 1, 1, 1, 1
+
+        # Stepper visual
+        MDBoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: '60dp'
+            spacing: '8dp'
+            padding: '8dp'
+            MDIcon:
+                icon: "numeric-1-circle" if root.current_step == 1 else "numeric-1-circle-outline"
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_color if root.current_step == 1 else (.5, .5, .5, 1)
+            MDSeparator:
+                orientation: 'vertical'
+                height: "32dp"
+                color: app.theme_cls.primary_color
+            MDIcon:
+                icon: "numeric-2-circle" if root.current_step == 2 else "numeric-2-circle-outline"
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_color if root.current_step == 2 else (.5, .5, .5, 1)
+            MDSeparator:
+                orientation: 'vertical'
+                height: "32dp"
+                color: app.theme_cls.primary_color
+            MDIcon:
+                icon: "numeric-3-circle-outline"
+                theme_text_color: "Custom"
+                text_color: (.5, .5, .5, 1)
+
+        # PASO 1: Base de caja
+        MDCard:
+            id: base_caja_card
+            opacity: 1 if root.current_step == 1 else 0
+            height: self.minimum_height if root.current_step == 1 else 0
+            padding: '20dp'
+            elevation: 6
+            md_bg_color: 1, 1, 0.8, 1
+            radius: [16, 16, 16, 16]
+            orientation: 'vertical'
+            spacing: '12dp'
+            
+            MDLabel:
+                text: "[b]Base de caja inicial[/b]"
+                markup: True
+                halign: "center"
+                font_style: "H6"
+                theme_text_color: "Custom"
+                text_color: 0.2, 0.2, 0.2, 1
+                size_hint_y: None
+                height: self.texture_size[1]
+            MDSeparator:
+                height: "2dp"
+                color: app.theme_cls.primary_color
+            # Tabla de billetes y monedas
+            MDGridLayout:
+                cols: 4
+                spacing: '8dp'
+                size_hint_y: None
+                height: self.minimum_height
+                MDLabel:
+                    text: "Denominación"
+                    bold: True
+                MDLabel:
+                    text: "Cantidad"
+                    bold: True
+                MDLabel:
+                    text: "Subtotal"
+                    bold: True
+                MDLabel:
+                    text: "Tipo"
+                    bold: True
+                # Filas
+                MDLabel:
+                    text: "$100.000"
+                MDTextField:
+                    id: b100k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b100k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$50.000"
+                MDTextField:
+                    id: b50k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b50k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$20.000"
+                MDTextField:
+                    id: b20k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b20k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$10.000"
+                MDTextField:
+                    id: b10k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b10k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$5.000"
+                MDTextField:
+                    id: b5k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b5k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$2.000"
+                MDTextField:
+                    id: b2k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b2k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$1.000"
+                MDTextField:
+                    id: b1k_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: b1k_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Billete"
+                MDLabel:
+                    text: "$500"
+                MDTextField:
+                    id: m500_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: m500_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Moneda"
+                MDLabel:
+                    text: "$200"
+                MDTextField:
+                    id: m200_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: m200_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Moneda"
+                MDLabel:
+                    text: "$100"
+                MDTextField:
+                    id: m100_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: m100_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Moneda"
+                MDLabel:
+                    text: "$50"
+                MDTextField:
+                    id: m50_field
+                    input_filter: 'int'
+                    on_text: root.update_base_caja()
+                MDLabel:
+                    id: m50_subtotal
+                    text: "$0"
+                MDLabel:
+                    text: "Moneda"
+            MDLabel:
+                id: base_caja_total
+                text: "[b]Total base de caja: $0[/b]"
+                markup: True
+                halign: "right"
+                font_style: "Subtitle1"
+                theme_text_color: "Custom"
+                text_color: 0.1, 0.1, 0.1, 1
+            MDRaisedButton:
+                text: "Siguiente ➡️"
+                on_release: root.next_step()
+                md_bg_color: app.theme_cls.accent_color
+                text_color: 1, 1, 1, 1
+                size_hint_x: 1
+                font_size: "18sp"
+                elevation: 4
+
+        # PASO 2: Registro de movimientos
+        MDCard:
+            id: movimientos_card
+            opacity: 1 if root.current_step == 2 else 0
+            height: self.minimum_height if root.current_step == 2 else 0
+            padding: '20dp'
+            elevation: 6
+            md_bg_color: 1, 1, 1, 1
+            radius: [16, 16, 16, 16]
+            orientation: 'vertical'
+            spacing: '12dp'
+            
+            MDLabel:
+                text: "[b]Registrar movimiento[/b]"
+                markup: True
+                halign: "center"
+                font_style: "H6"
+                theme_text_color: "Primary"
+                size_hint_y: None
+                height: self.texture_size[1]
+            MDSeparator:
+                height: "2dp"
+                color: app.theme_cls.primary_color
+            # Botones de tipo de movimiento
+            MDBoxLayout:
+                orientation: 'horizontal'
+                spacing: '8dp'
+                size_hint_y: None
+                height: '48dp'
+                MDRaisedButton:
+                    text: "Pago"
+                    on_release: root.set_tipo_movimiento('Pago')
+                MDRaisedButton:
+                    text: "Gasto"
+                    on_release: root.set_tipo_movimiento('Gasto')
+                MDRaisedButton:
+                    text: "Devolución"
+                    on_release: root.set_tipo_movimiento('Devolución')
+                MDRaisedButton:
+                    text: "Transferencia"
+                    on_release: root.set_tipo_movimiento('Transferencia')
+            # Formulario rápido de movimiento
+            MDTextField:
+                id: mov_concepto
+                hint_text: "Concepto"
+                helper_text: "Ej: Compra, abono, etc."
+                helper_text_mode: "on_focus"
+            MDTextField:
+                id: mov_monto
+                hint_text: "Monto"
+                input_filter: 'float'
+                helper_text: "Valor del movimiento"
+                helper_text_mode: "on_focus"
+            MDRaisedButton:
+                text: "Agregar movimiento"
+                on_release: root.agregar_movimiento()
+                md_bg_color: app.theme_cls.primary_color
+                text_color: 1, 1, 1, 1
+                size_hint_x: 1
+                font_size: "16sp"
+                elevation: 2
+            # Lista de movimientos
+            MDLabel:
+                text: "[b]Movimientos registrados:[/b]"
+                markup: True
+                font_style: "Subtitle1"
+                theme_text_color: "Secondary"
+            ScrollView:
+                MDList:
+                    id: movimientos_list
+            MDLabel:
+                id: movimientos_total
+                text: "[b]Total movimientos: $0[/b]"
+                markup: True
+                halign: "right"
+                font_style: "Subtitle1"
+                theme_text_color: "Custom"
+                text_color: 0.1, 0.1, 0.1, 1
+            MDBoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '48dp'
+                spacing: '8dp'
+                MDRaisedButton:
+                    text: "⬅️ Anterior"
+                    on_release: root.previous_step()
+                    md_bg_color: app.theme_cls.primary_light
+                    text_color: 0, 0, 0, 1
+                    font_size: "16sp"
+                MDRaisedButton:
+                    text: "Siguiente ➡️"
+                    on_release: root.next_step()
+                    md_bg_color: app.theme_cls.accent_color
+                    text_color: 1, 1, 1, 1
+                    font_size: "16sp" 
