@@ -1,2 +1,2 @@
 # Cierre_caja
-programa  para cerrar caja
+Programa para cerrar caja
